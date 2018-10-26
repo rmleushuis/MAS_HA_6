@@ -4,14 +4,14 @@ import random
 
 # initialize matrix to store the state-action values
 state_action_values_Q = np.full((4, 8 , 8), 0, dtype = "float")
-state_action_values_SARSA = np.full((4, 8 , 8), 0, dtype = "float")
+state_action_values_SARSA = np.full((4, 8 , 8), -10, dtype = "float")
 
 # define parameters of problem solution
 gamma = 1
-alpha = 0.3
-epsilon = 0.9
-episodes = 1000
-av_reward = np.zeros((episodes, 5), dtype = "float")
+alpha = 0.5
+epsilon = 0.8
+episodes = 10000
+#av_reward = np.zeros((episodes, 5), dtype = "float")
 
 
 def check_position(x, y):
@@ -21,11 +21,7 @@ def check_position(x, y):
     # check if position is a wall
     if y == 1 and x in {2, 3, 4, 5}:
         return 1
-    if y == 2 and x == 5:
-        return 1
-    if y == 3 and x == 5:
-        return 1
-    if y == 4 and x == 5:
+    if x == 5 and y in {2, 3, 5}:
         return 1
     if y == 6 and x in {1, 2, 3}:
         return 1
@@ -95,11 +91,13 @@ for epis in range(episodes):
             if check == 1:
                 # wall
                 state_action_values_Q[step, y, x] = -10
-                state_action_values_SARSA[step, y, x] = -10
+                state_action_values_SARSA[step, y, x] += alpha * (-1 +
+                gamma * sum(state_action_values_SARSA[:, y , x ])/4 - state_action_values_SARSA[step, y, x])
             elif check == 2:
                 # snake pit terminal state
                 state_action_values_Q[step, y, x] = -20
-                state_action_values_SARSA[step, y, x] = -20
+                state_action_values_SARSA[step, y, x] += alpha * (-20 +
+                gamma * sum(state_action_values_SARSA[:, y , x ])/4 - state_action_values_SARSA[step, y, x])
                 break
             elif check == 3:
                 # treasure terminal state
@@ -114,12 +112,13 @@ for epis in range(episodes):
                 gamma * max(state_action_values_Q[:, y + y_step, x + x_step]) -
                 state_action_values_Q[step, y, x])
 
-                # Random Sarsa algorithm---------------------------------------
-                next_action = np.random.randint(low = 0, high = 4,
-                                                       dtype = "l")
+                # Expected value SARSA algorithm--------------------------------
+
+                # calculate next state SARSA expected value
+
                 state_action_values_SARSA[step, y, x] += alpha * (-1 +
-                gamma * state_action_values_SARSA[next_action, y + y_step, x + \
-                x_step] -state_action_values_SARSA[step, y, x])
+                gamma * sum(state_action_values_SARSA[:, y + y_step, x + \
+                x_step])/4 - state_action_values_SARSA[step, y, x])
 
                 # update new location
                 x += x_step
@@ -128,8 +127,8 @@ for epis in range(episodes):
         # exploit
         else:
             # take the greedy action
-            best_actions = np.where(state_action_values_Q[:, y, x] == \
-                                    max(state_action_values_Q[:, y, x]))[0]
+            best_actions = np.where(state_action_values_SARSA[:, y, x] == \
+                                    max(state_action_values_SARSA[:, y, x]))[0]
             step = random.choice(best_actions)
 
             # define steps
@@ -152,7 +151,8 @@ for epis in range(episodes):
             if check == 1:
                 # wall
                 state_action_values_Q[step, y, x] = -10
-                state_action_values_SARSA[step, y, x] = -10
+                state_action_values_SARSA[step, y, x] += alpha * (-1 +
+                gamma * sum(state_action_values_SARSA[:, y , x ])/4 - state_action_values_SARSA[step, y, x])
             elif check == 2:
                 # snake pit terminal state
                 state_action_values_Q[step, y, x] = -20
@@ -171,12 +171,10 @@ for epis in range(episodes):
                 gamma * max(state_action_values_Q[:, y + y_step, x + x_step]) -
                 state_action_values_Q[step, y, x])
 
-                # Random Sarsa algorithm---------------------------------------
-                next_action = np.random.randint(low = 0, high = 4,
-                                                       dtype = "l")
+                # Expected value SARSA algorithm--------------------------------
                 state_action_values_SARSA[step, y, x] += alpha * (-1 +
-                gamma * state_action_values_SARSA[next_action, y + y_step, x + \
-                x_step] -state_action_values_SARSA[step, y, x])
+                gamma * sum(state_action_values_SARSA[:, y + y_step, x + \
+                x_step])/4 -state_action_values_SARSA[step, y, x])
 
                 # update new location
                 x += x_step
@@ -212,5 +210,6 @@ policy_SARSA[6, 1:4] = "X"
 policy_SARSA[7, 7] = "X"
 
 # print policy tables
-print(policy_Q)
+#print(policy_Q)
+print(np.round(state_action_values_SARSA,1))
 print(policy_SARSA)
