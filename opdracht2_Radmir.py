@@ -11,6 +11,8 @@ gamma = 1
 alpha = 0.3
 epsilon = 0.9
 episodes = 1000
+av_reward = np.zeros((episodes, 5), dtype = "float")
+
 
 def check_position(x, y):
     """"This function checks whether the proposed position (determined with x
@@ -120,8 +122,8 @@ for epis in range(episodes):
                 x_step] -state_action_values_SARSA[step, y, x])
 
                 # update new location
-                x = x + x_step
-                y = y + y_step
+                x += x_step
+                y += y_step
 
         # exploit
         else:
@@ -177,8 +179,8 @@ for epis in range(episodes):
                 x_step] -state_action_values_SARSA[step, y, x])
 
                 # update new location
-                x = x + x_step
-                y = y + y_step
+                x += x_step
+                y += y_step
 
 
 # create arrays to store the optimal policy steps in
