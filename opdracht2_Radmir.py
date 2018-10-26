@@ -1,7 +1,7 @@
 import numpy as np
 
 # initiliaze grid parameters
-state_action_values = np.full((4, 8 , 8), -100)
+state_action_values = np.full((4, 8 , 8), 1)
 
 # basic characteristics of problem
 gamma = 1
@@ -12,20 +12,20 @@ episodes = 1000
 def check_position(x,y):
 
     # check for walls
-    if x == 1:
-        if y == 2 or y == 3 or y == 4 or y == 5:
+    if y == 1:
+        if x == 2 or x == 3 or x == 4 or x == 5:
             return 1
-    if x == 2:
-        if y == 5:
+    if y == 2:
+        if x == 5:
             return 1
-    if x == 3:
-        if y == 5:
+    if y == 3:
+        if x == 5:
             return 1
-    if x == 4:
-        if y == 5:
+    if y == 4:
+        if x == 5:
             return 1
-    if x == 6:
-        if y == 1 or y == 2 or y == 3 or y == 4:
+    if y == 6:
+        if x == 1 or x == 2 or x == 3 or x == 4:
             return 1
 
     # check for off-grid
@@ -33,13 +33,13 @@ def check_position(x,y):
         return 1
 
     # check for snake pits
-    if x == 5:
-        if y == 4:
+    if y == 5:
+        if x == 4:
             return 2
 
     # check for treasure
-    if x == 7:
-        if y == 7:
+    if y == 7:
+        if x == 7:
             return 3
 
     return 0
@@ -50,9 +50,9 @@ for epis in range(episodes):
     check = 1
 
     while check > 0:
-        [x,y] = np.random.randint(low = 0, high = 8, size = (2, 1), dtype = 'l')
-        [x,y] = [x[0], y[0]]
-        check = check_position(x, y)
+        [y,x] = np.random.randint(low = 0, high = 8, size = (2, 1), dtype = 'l')
+        [y,x] = [y[0], x[0]]
+        check = check_position(y, x)
 
     while check < 2:
         # run an eps-greedy policy
@@ -86,21 +86,21 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[step, x, y] = -1
+                state_action_values[step, y, x] = -1
             if check == 2:
-                state_action_values[step, x, y] = -20
+                state_action_values[step, y, x] = -20
                 break
             if check == 3:
-                state_action_values[step, x, y] = 10
+                state_action_values[step, y, x] = 10
                 break
             if check == 0:
-                state_action_values[step, x, y] = state_action_values[step, x, y] +\
-                    alpha * (-1 + gamma * max(state_action_values[:, x + x_step, y + y_step]) - state_action_values[step, x, y])
+                state_action_values[step, y, x] = state_action_values[step, y, x] +\
+                    alpha * (-1 + gamma * max(state_action_values[:, y + y_step, x + x_step]) - state_action_values[step, y, x])
                 x = x + x_step
                 y = y + y_step
         else:
             # take greendy action
-            step = np.argmax(state_action_values[:, x, y])
+            step = np.argmax(state_action_values[:, y, x])
 
             # define steps
             if step == 0:
@@ -123,16 +123,16 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[step, x, y] = -1
+                state_action_values[step, y, x] = -1
             if check == 2:
-                state_action_values[step, x, y] = -20
+                state_action_values[step, y, x] = -20
                 break
             if check == 3:
-                state_action_values[step, x, y] = 10
+                state_action_values[step, y, x] = 10
                 break
             if check == 0:
-                state_action_values[step, x, y] = state_action_values[step, x, y] +\
-                    alpha * (-1 + gamma * max(state_action_values[:, x + x_step, y + y_step]) - state_action_values[step, x, y])
+                state_action_values[step, y, x] = state_action_values[step, y, x] +\
+                    alpha * (-1 + gamma * max(state_action_values[:, y + y_step, x + x_step]) - state_action_values[step, y, x])
                 x = x + x_step
                 y = y + y_step
 
