@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 # initiliaze grid parameters
 state_action_values = np.full((4, 8 , 8), 1)
@@ -53,7 +54,6 @@ for epis in range(episodes):
         [x,y] = np.random.randint(low = 0, high = 8, size = (2, 1), dtype = 'l')
         [x,y] = [x[0], y[0]]
         check = check_position(x, y)
-
     while check < 2:
         # run an eps-greedy policy
         eps = np.random.uniform(low = 0, high = 1)
@@ -70,10 +70,10 @@ for epis in range(episodes):
                 y_step = np.random.randint(low = -1, high = 2, dtype='l')
 
             # define steps
-            if x_step == 0 and y_step == 1:
+            if x_step == 0 and y_step == -1:
                 # up
                 step = 0
-            if x_step == 0 and y_step == -1:
+            if x_step == 0 and y_step == 1:
                 # down
                 step = 1
             if x_step == 1 and y_step == 0:
@@ -86,12 +86,12 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[step, y, x] = -1
+                state_action_values[step, y, x] = -100
             if check == 2:
-                state_action_values[step, y + y_step, x + x_step] = -20
+                state_action_values[step, y, x] = -20
                 break
             if check == 3:
-                state_action_values[step, y + y_step, x + x_step] = 10
+                state_action_values[step, y, x] = 10
                 break
             if check == 0:
                 state_action_values[step, y, x] = state_action_values[step, y, x] +\
@@ -100,17 +100,18 @@ for epis in range(episodes):
                 y = y + y_step
         else:
             # take greendy action
-            step = np.argmax(state_action_values[:, y, x])
+            best_actions = np.where(state_action_values[:, y, x] == max(state_action_values[:, y, x]))[0]
+            step = random.choice(best_actions)
 
             # define steps
             if step == 0:
                 # up
                 x_step = 0
-                y_step = 1
+                y_step = -1
             if step == 1:
                 # down
                 x_step = 0
-                y_step = -1
+                y_step = 1
             if step == 2:
                 # right
                 x_step = 1
@@ -123,7 +124,7 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[step, y, x] = -1
+                state_action_values[step, y, x] = -100
             if check == 2:
                 state_action_values[step, y + y_step, x + x_step] = -20
                 break
@@ -135,7 +136,6 @@ for epis in range(episodes):
                     alpha * (-1 + gamma * max(state_action_values[:, y + y_step, x + x_step]) - state_action_values[step, y, x])
                 x = x + x_step
                 y = y + y_step
-
 
 test = np.zeros(shape = (8, 8))
 for i in range(8):
