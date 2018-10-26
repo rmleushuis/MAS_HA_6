@@ -1,12 +1,12 @@
 import numpy as np
 
 # initiliaze grid parameters
-state_action_values = np.full((8, 8 , 4), -1)
+state_action_values = np.full((4, 8 , 8), -100)
 
 # basic characteristics of problem
 gamma = 1
-alpha = 0.8
-epsilon = 0.1
+alpha = 0.2
+epsilon = 0.3
 episodes = 1000
 
 def check_position(x,y):
@@ -86,23 +86,21 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[x,y,step] = -1
+                state_action_values[step, x, y] = -1
             if check == 2:
-                state_action_values[x, y, step] = -20
+                state_action_values[step, x, y] = -20
                 break
             if check == 3:
-                state_action_values[x, y, step] = 10
+                state_action_values[step, x, y] = 10
                 break
             if check == 0:
-                print(state_action_values[x, y, step])
-                state_action_values[x, y, step] = state_action_values[x, y, step] +\
-                    alpha * (-1 + gamma * max(state_action_values[x + x_step, y + y_step, :]) - state_action_values[x, y, step])
-                print(state_action_values[x, y, step])
+                state_action_values[step, x, y] = state_action_values[step, x, y] +\
+                    alpha * (-1 + gamma * max(state_action_values[:, x + x_step, y + y_step]) - state_action_values[step, x, y])
                 x = x + x_step
                 y = y + y_step
         else:
             # take greendy action
-            step = np.argmax(state_action_values[x , y, :])
+            step = np.argmax(state_action_values[:, x, y])
 
             # define steps
             if step == 0:
@@ -125,16 +123,16 @@ for epis in range(episodes):
             check = check_position(x + x_step, y + y_step)
 
             if check == 1:
-                state_action_values[x,y,step] = -1
+                state_action_values[step, x, y] = -1
             if check == 2:
-                state_action_values[x, y, step] = -20
+                state_action_values[step, x, y] = -20
                 break
             if check == 3:
-                state_action_values[x, y, step] = 10
+                state_action_values[step, x, y] = 10
                 break
             if check == 0:
-                state_action_values[x, y, step] = state_action_values[x, y, step] +\
-                    alpha * (-1 + gamma * max(state_action_values[x + x_step, y + y_step, :]) - state_action_values[x, y, step])
+                state_action_values[step, x, y] = state_action_values[step, x, y] +\
+                    alpha * (-1 + gamma * max(state_action_values[:, x + x_step, y + y_step]) - state_action_values[step, x, y])
                 x = x + x_step
                 y = y + y_step
 
@@ -142,8 +140,8 @@ for epis in range(episodes):
 test = np.zeros(shape = (8, 8))
 for i in range(8):
     for j in range(8):
-        test[i,j] = np.argmax(state_action_values[i,j,:])
+        test[i,j] = np.argmax(state_action_values[:,i,j])
 
 
 
-print(state_action_values)
+print(test)
