@@ -7,7 +7,7 @@ state_action_values = np.full((4, 8 , 8), 1)
 gamma = 1
 alpha = 0.2
 epsilon = 0.3
-episodes = 10000
+episodes = 1000
 
 def check_position(x,y):
 
@@ -25,7 +25,7 @@ def check_position(x,y):
         if x == 5:
             return 1
     if y == 6:
-        if x == 1 or x == 2 or x == 3 or x == 4:
+        if x == 1 or x == 2 or x == 3:
             return 1
 
     # check for off-grid
@@ -88,10 +88,10 @@ for epis in range(episodes):
             if check == 1:
                 state_action_values[step, y, x] = -1
             if check == 2:
-                state_action_values[step, y, x] = -20
+                state_action_values[step, y + y_step, x + x_step] = -20
                 break
             if check == 3:
-                state_action_values[step, y, x] = 10
+                state_action_values[step, y + y_step, x + x_step] = 10
                 break
             if check == 0:
                 state_action_values[step, y, x] = state_action_values[step, y, x] +\
@@ -125,10 +125,10 @@ for epis in range(episodes):
             if check == 1:
                 state_action_values[step, y, x] = -1
             if check == 2:
-                state_action_values[step, y, x] = -20
+                state_action_values[step, y + y_step, x + x_step] = -20
                 break
             if check == 3:
-                state_action_values[step, y, x] = 10
+                state_action_values[step, y + y_step, x + x_step] = 10
                 break
             if check == 0:
                 state_action_values[step, y, x] = state_action_values[step, y, x] +\
@@ -144,4 +144,4 @@ for i in range(8):
 
 
 
-print(test)
+print(state_action_values)
