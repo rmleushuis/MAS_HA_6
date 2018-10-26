@@ -7,7 +7,7 @@ state_action_values = np.full((4, 8 , 8), 1)
 gamma = 1
 alpha = 0.2
 epsilon = 0.3
-episodes = 1000
+episodes = 10000
 
 def check_position(x,y):
 
@@ -50,9 +50,9 @@ for epis in range(episodes):
     check = 1
 
     while check > 0:
-        [y,x] = np.random.randint(low = 0, high = 8, size = (2, 1), dtype = 'l')
-        [y,x] = [y[0], x[0]]
-        check = check_position(y, x)
+        [x,y] = np.random.randint(low = 0, high = 8, size = (2, 1), dtype = 'l')
+        [x,y] = [x[0], y[0]]
+        check = check_position(x, y)
 
     while check < 2:
         # run an eps-greedy policy
