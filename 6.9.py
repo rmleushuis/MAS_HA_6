@@ -12,7 +12,7 @@ gamma = 1
 alpha = 0.4
 epsilon = 0.6
 episodes = 1000
-avg_reward = np.zeros((episodes, 14), dtype="float")
+avg_reward = np.zeros((episodes, 2), dtype="float")
 
 
 def check_position(x, y):
@@ -362,7 +362,10 @@ policy_SARSA[5, 4] = "X"
 policy_SARSA[6, 1:4] = "X"
 policy_SARSA[7, 7] = "X"
 
+print("policy SARSA:")
 print(policy_SARSA)
+
+print("\npolicy Q-learning:")
 print(policy_Q)
 
 fig1 = plt.figure(1, figsize=(10, 6))
