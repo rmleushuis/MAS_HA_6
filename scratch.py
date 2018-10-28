@@ -1,38 +1,21 @@
-#######################################################################
-# Copyright (C)                                                       #
-# 2016-2018 Shangtong Zhang(zhangshangtong.cpp@gmail.com)             #
-# 2016 Kenta Shimada(hyperkentakun@gmail.com)                         #
-# Permission given to modify the code as long as you keep this        #
-# declaration at the top                                              #
-#######################################################################
-
+# import necessary modules
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-# world height
-WORLD_HEIGHT = 4
+# basic characteristics of the problem definition
+height = 4
+width = 12
+epsilon = 0.2
+alpha = 0.5
+gamma = 1
 
-# world width
-WORLD_WIDTH = 12
-
-# probability for exploration
-EPSILON = 0.1
-
-# step size
-ALPHA = 0.5
-
-# gamma for Q-Learning and Expected Sarsa
-GAMMA = 1
-
-# all possible actions
-ACTION_UP = 0
-ACTION_DOWN = 1
-ACTION_LEFT = 2
-ACTION_RIGHT = 3
-ACTIONS = [ACTION_UP, ACTION_DOWN, ACTION_LEFT, ACTION_RIGHT]
+# all possible actions an agent can take
+up = 0
+down = 1
+left = 2
+right = 3
+actions = [up, down, left, right]
 
 # initial state action pair values
 START = [3, 0]
@@ -40,61 +23,35 @@ GOAL = [3, 11]
 
 def step(state, action):
     i, j = state
-    if action == ACTION_UP:
+    if action == up:
         next_state = [max(i - 1, 0), j]
-    elif action == ACTION_LEFT:
+    elif action == left:
         next_state = [i, max(j - 1, 0)]
-    elif action == ACTION_RIGHT:
-        next_state = [i, min(j + 1, WORLD_WIDTH - 1)]
-    elif action == ACTION_DOWN:
-        next_state = [min(i + 1, WORLD_HEIGHT - 1), j]
+    elif action == right:
+        next_state = [i, min(j + 1, width - 1)]
+    elif action == down:
+        next_state = [min(i + 1, height - 1), j]
     else:
         assert False
 
     reward = -1
-    if (action == ACTION_DOWN and i == 2 and 1 <= j <= 10) or (
-        action == ACTION_RIGHT and state == START):
+    if (action == down and i == 2 and 1 <= j <= 10) or (
+        action == right and state == START):
         reward = -100
         next_state = START
 
     return next_state, reward
 
-# reward for each action in each state
-# actionRewards = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
-# actionRewards[:, :, :] = -1.0
-# actionRewards[2, 1:11, ACTION_DOWN] = -100.0
-# actionRewards[3, 0, ACTION_RIGHT] = -100.0
-
-# set up destinations for each action in each state
-# actionDestination = []
-# for i in range(0, WORLD_HEIGHT):
-#     actionDestination.append([])
-#     for j in range(0, WORLD_WIDTH):
-#         destinaion = dict()
-#         destinaion[ACTION_UP] = [max(i - 1, 0), j]
-#         destinaion[ACTION_LEFT] = [i, max(j - 1, 0)]
-#         destinaion[ACTION_RIGHT] = [i, min(j + 1, WORLD_WIDTH - 1)]
-#         if i == 2 and 1 <= j <= 10:
-#             destinaion[ACTION_DOWN] = START
-#         else:
-#             destinaion[ACTION_DOWN] = [min(i + 1, WORLD_HEIGHT - 1), j]
-#         actionDestination[-1].append(destinaion)
-# actionDestination[3][0][ACTION_RIGHT] = START
-
 # choose an action based on epsilon greedy algorithm
 def choose_action(state, q_value):
-    if np.random.binomial(1, EPSILON) == 1:
-        return np.random.choice(ACTIONS)
+    if np.random.binomial(1, epsilon) == 1:
+        return np.random.choice(actions)
     else:
         values_ = q_value[state[0], state[1], :]
         return np.random.choice([action_ for action_, value_ in enumerate(values_) if value_ == np.max(values_)])
 
 # an episode with Sarsa
-# @q_value: values for state action pair, will be updated
-# @expected: if True, will use expected Sarsa algorithm
-# @step_size: step size for updating
-# @return: total rewards within this episode
-def sarsa(q_value, expected=False, step_size=ALPHA):
+def sarsa(q_value, expected=False, step_size=alpha):
     state = START
     action = choose_action(state, q_value)
     rewards = 0.0
@@ -109,12 +66,12 @@ def sarsa(q_value, expected=False, step_size=ALPHA):
             target = 0.0
             q_next = q_value[next_state[0], next_state[1], :]
             best_actions = np.argwhere(q_next == np.max(q_next))
-            for action_ in ACTIONS:
+            for action_ in actions:
                 if action_ in best_actions:
-                    target += ((1.0 - EPSILON) / len(best_actions) + EPSILON / len(ACTIONS)) * q_value[next_state[0], next_state[1], action_]
+                    target += ((1.0 - epsilon) / len(best_actions) + epsilon / len(actions)) * q_value[next_state[0], next_state[1], action_]
                 else:
-                    target += EPSILON / len(ACTIONS) * q_value[next_state[0], next_state[1], action_]
-        target *= GAMMA
+                    target += epsilon / len(actions) * q_value[next_state[0], next_state[1], action_]
+        target *= gamma
         q_value[state[0], state[1], action] += step_size * (
                 reward + target - q_value[state[0], state[1], action])
         state = next_state
@@ -122,10 +79,7 @@ def sarsa(q_value, expected=False, step_size=ALPHA):
     return rewards
 
 # an episode with Q-Learning
-# @q_value: values for state action pair, will be updated
-# @step_size: step size for updating
-# @return: total rewards within this episode
-def q_learning(q_value, step_size=ALPHA):
+def q_learning(q_value, step_size=alpha):
     state = START
     rewards = 0.0
     while state != GOAL:
@@ -134,7 +88,7 @@ def q_learning(q_value, step_size=ALPHA):
         rewards += reward
         # Q-Learning update
         q_value[state[0], state[1], action] += step_size * (
-                reward + GAMMA * np.max(q_value[next_state[0], next_state[1], :]) -
+                reward + gamma * np.max(q_value[next_state[0], next_state[1], :]) -
                 q_value[state[0], state[1], action])
         state = next_state
     return rewards
@@ -142,28 +96,24 @@ def q_learning(q_value, step_size=ALPHA):
 # print optimal policy
 def print_optimal_policy(q_value):
     optimal_policy = []
-    for i in range(0, WORLD_HEIGHT):
+    for i in range(0, height):
         optimal_policy.append([])
-        for j in range(0, WORLD_WIDTH):
+        for j in range(0, width):
             if [i, j] == GOAL:
                 optimal_policy[-1].append('G')
                 continue
             bestAction = np.argmax(q_value[i, j, :])
-            if bestAction == ACTION_UP:
+            if bestAction == up:
                 optimal_policy[-1].append('U')
-            elif bestAction == ACTION_DOWN:
+            elif bestAction == down:
                 optimal_policy[-1].append('D')
-            elif bestAction == ACTION_LEFT:
+            elif bestAction == left:
                 optimal_policy[-1].append('L')
-            elif bestAction == ACTION_RIGHT:
+            elif bestAction == right:
                 optimal_policy[-1].append('R')
     for row in optimal_policy:
         print(row)
 
-# Use multiple runs instead of a single run and a sliding window
-# With a single run I failed to present a smooth curve
-# However the optimal policy converges well with a single run
-# Sarsa converges to the safe path, while Q-Learning converges to the optimal path
 def figure_6_4():
     # episodes of each run
     episodes = 500
@@ -174,7 +124,7 @@ def figure_6_4():
     rewards_sarsa = np.zeros(episodes)
     rewards_q_learning = np.zeros(episodes)
     for r in tqdm(range(runs)):
-        q_sarsa = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
+        q_sarsa = np.zeros((height, width, 4))
         q_q_learning = np.copy(q_sarsa)
         for i in range(0, episodes):
             # cut off the value by -100 to draw the figure more elegantly
@@ -204,8 +154,6 @@ def figure_6_4():
     print('Q-Learning Optimal Policy:')
     print_optimal_policy(q_q_learning)
 
-# Due to limited capacity of calculation of my machine, I can't complete this experiment
-# with 100,000 episodes and 50,000 runs to get the fully averaged performance
 # However even I only play for 1,000 episodes and 10 runs, the curves looks still good.
 def figure_6_6():
     step_sizes = np.arange(0.1, 1.1, 0.1)
@@ -223,7 +171,7 @@ def figure_6_6():
     performace = np.zeros((6, len(step_sizes)))
     for run in range(runs):
         for ind, step_size in tqdm(list(zip(range(0, len(step_sizes)), step_sizes))):
-            q_sarsa = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
+            q_sarsa = np.zeros((height, width, 4))
             q_expected_sarsa = np.copy(q_sarsa)
             q_q_learning = np.copy(q_sarsa)
             for ep in range(episodes):
