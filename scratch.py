@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 # basic characteristics of the problem definition
-height = 4
-width = 12
-epsilon = 0.2
+height = 6
+width = 10
+epsilon = 0.9
 alpha = 0.5
 gamma = 1
 
@@ -18,8 +18,8 @@ right = 3
 actions = [up, down, left, right]
 
 # initial state action pair values
-START = [3, 0]
-GOAL = [3, 11]
+START = [5, 0]
+GOAL = [5, 9]
 
 def step(state, action):
     i, j = state
@@ -35,7 +35,7 @@ def step(state, action):
         assert False
 
     reward = -1
-    if (action == down and i == 2 and 1 <= j <= 10) or (
+    if (action == down and i == 4 and 1 <= j <= 8) or (
         action == right and state == START):
         reward = -100
         next_state = START

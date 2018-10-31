@@ -10,7 +10,7 @@ state_action_values_SARSA = np.full((4, 8, 8), 0, dtype="float")
 # define parameters of problem solution
 gamma = 1
 alpha = 0.4
-epsilon = 0.6
+epsilon = 0
 episodes = 1000
 avg_reward = np.zeros((episodes, 2), dtype="float")
 
